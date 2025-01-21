@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import Swal from "sweetalert2";
-import { couponResponse, masterDataResponse } from "../../ui/models/response";
+import { couponResponse, masterDataResponse } from "../ui/models/response";
 
 function page() {
   const route = useRouter();

@@ -1,12 +1,14 @@
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CloseIcon from "@/public/close-icon.svg";
 import Swal from "sweetalert2";
 import {
   couponResponse,
   addCouponResponse,
   Coupon,
+  MasterDataItem,
 } from "../../models/response";
+import MultiSelectField from "../../reuseableComponent/multiSelectComponent";
 type PopupFormProps = {
   setIsOpen: (isOpen: boolean) => void; // Function to control popup visibility
   onSave: (data: Coupon | ((prev: Coupon[]) => Coupon[])) => void;
@@ -19,7 +21,6 @@ type FormData = {
   description: string;
   discountType: string;
   discountValue: string;
-  typeOfBooking: string;
   category: string;
 };
 
@@ -31,9 +32,30 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
     description: "",
     discountType: "",
     discountValue: "",
-    typeOfBooking: "",
     category: "",
   });
+  const [typeOfBooking, setTypeOfBooking] = useState<MasterDataItem[]>([]);
+
+  const [discountTypeList, setDiscountTypeList] = useState<MasterDataItem[]>(
+    []
+  );
+  const [typeOfBookingList, setTypeOfBookingList] = useState<MasterDataItem[]>(
+    []
+  );
+  const [categoryList, setCategoryList] = useState<MasterDataItem[]>([]);
+
+  useEffect(() => {
+    const storedData = localStorage.getItem("masterData");
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const discounttype: MasterDataItem[] = parsedData?.discountType || [];
+      setDiscountTypeList(discounttype);
+      const typeofbooking: MasterDataItem[] = parsedData?.typeOfBooking || [];
+      setTypeOfBookingList(typeofbooking);
+      const categorys: MasterDataItem[] = parsedData?.couponCategory || [];
+      setCategoryList(categorys);
+    }
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -69,7 +91,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
           description: formData.description,
           discountValue: Number(formData.discountValue),
           discountType: formData.discountType,
-          typeOfBooking: formData.typeOfBooking,
+          typeOfBooking: typeOfBooking.map((item) => item.name).join(","),
           category: formData.category,
         }),
       });
@@ -102,11 +124,8 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        className="bg-white px-6 py-3 rounded-lg shadow-lg w-[550px] h-[630px] overflow-auto"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        <div className="flex justify-between items-center py-4">
+      <div className="bg-white  pt-3  rounded-lg shadow-lg w-[550px] ">
+        <div className="flex justify-between items-center px-6 py-4 border-b-2">
           <h2 className="text-xl font-bold">Add Coupon</h2>
           <button
             className="p-0 bg-transparent border-none"
@@ -116,9 +135,13 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          className="px-8 h-[580px] overflow-auto"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {/* Name Field */}
-          <div className="mb-4">
+          <div className="mb-4 mt-5">
             <label className="block text-gray-700 mb-1">Name</label>
             <input
               type="text"
@@ -182,8 +205,11 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
               required
             >
               <option value="">Select Discount Type</option>
-              <option value="FLAT">FLAT</option>
-              <option value="PERCENTAGE">PERCENTAGE</option>
+              {discountTypeList.map((type) => (
+                <option key={type.id} value={type.name}>
+                  {type.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -202,21 +228,16 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
 
           {/* Type of Booking Dropdown */}
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1">Type of Booking</label>
-            <select
-              name="typeOfBooking"
-              value={formData.typeOfBooking}
-              onChange={handleChange}
-              className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select Type of Booking</option>
-              <option value="Bus">Bus</option>
-              <option value="Hotels">Hotels</option>
-              <option value="Cabs">Cabs</option>
-              <option value="Flights">Flights</option>
-              <option value="Trains">Trains</option>
-            </select>
+            <label className="block text-gray-700 mb-1">Type Of Booking</label>
+            <MultiSelectField
+              options={typeOfBookingList.map((user) => ({
+                id: user.id,
+                name: user.name,
+              }))}
+              selectedValues={typeOfBooking}
+              onChange={(selected) => setTypeOfBooking(selected)}
+              placeholder="Select"
+            />
           </div>
 
           {/* Category Dropdown */}
@@ -230,14 +251,16 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
               required
             >
               <option value="">Select Category</option>
-              <option value="Special Deals">Special Deals</option>
-              <option value="Holiday Packages">Holiday Packages</option>
-              <option value="Adventure Activities">Adventure Activities</option>
+              {categoryList.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
             </select>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-2 w-full">
+          <div className="flex justify-end space-x-2 w-full pb-8">
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
