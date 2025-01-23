@@ -1,24 +1,33 @@
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CloseIcon from "@/public/close-icon.svg";
 import Spinner from "../../utility/spinner";
 import Swal from "sweetalert2";
 import { addCouponResponse, addUserResponse, UserItem, userResponse } from "../../models/response";
 interface PropsType {
   setIsOpen: (isOpen: boolean) => void;
-  onSave: (data:UserItem[]  | ((prev: UserItem[]) => UserItem[])) => void;
+  data?:UserItem
+  onSave:(updatedCoupon: UserItem) => void;
 }
 
-function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
+function UserDetailsForm({ setIsOpen,data,onSave }: PropsType) {
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
     email: "",
-    password:"",
     phone: "",
     active: true,
   });
   const [Loading,setLoading]=useState(false);
+  useEffect(()=>{
+    setFormData({
+        firstname: data?.firstname||"",
+        lastname: data?.lastname||"",
+        email: data?.email||"",
+        phone: data?.phone||"",
+        active: data?.active||true,
+    })
+  },[data]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -30,50 +39,50 @@ function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
 
   const handleSubmit = async (e: React.FormEvent)=> {
     e.preventDefault();
-        setLoading(true);
+    setLoading(true);
         try {
-          const response = await fetch("/api/user/add", {
-            method: "POST",
-            // headers: {
-            //   authorization: Bearer ${localStorage.getItem('authToken')},
-            //   'notesId': String(currentCallNote?.id),
-            // },
+          const response = await fetch("/api/users/update", {
+            method: "PUT",
+            headers: {
+              //   authorization: Bearer ${localStorage.getItem('authToken')},
+              id: data?._id || "",
+            },
             body: JSON.stringify({
-              firstname: formData.firstname,
-              lastname: formData.lastname,
-              email: formData.email,
-              password:formData.password,
-              phone: formData.phone,
-              active: formData.active,
+                firstname: formData.firstname,
+                lastname: formData.lastname,
+                email: formData.email,
+                phone: formData.phone,
+                active: formData.active,
+              
             }),
           });
-          const sResponse: addUserResponse =
-            (await response.json()) as addUserResponse;
-            setLoading(false);
-            console.log(sResponse);
+          const sResponse = await response.json();
+          console.log("response:", sResponse);
+          setLoading(false);
           if (sResponse.status) {
             Swal.fire({
-              title: "Add New User Successful",
+              title: "Update User Details Successful",
               icon: "success",
             });
-            onSave((prev)=>[...prev,sResponse.data]);
+            onSave(sResponse.data);
             setIsOpen(false);
           } else {
             Swal.fire({
-              title: "Failed to User",
+              title: "Failed to Update User Details",
               text: sResponse.message || "An unknown error occurred.",
               icon: "error",
             });
           }
         } catch (error) {
-          // setLoading(false);
-          console.error("Error adding New User:", error);
+          setLoading(false);
+          console.error("Error adding coupon:", error);
           Swal.fire({
             title: "Error",
-            text: "An error occurred while adding the User. Please try again.",
+            text: "An error occurred while updating the User Details. Please try again.",
             icon: "error",
           });
         }
+        
   }
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -94,7 +103,7 @@ function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
         </div>
         <form
           onSubmit={handleSubmit}
-          className="px-8 h-[600px] overflow-auto"
+          className="px-8 h-[520px] overflow-auto"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           <div className="mb-4 mt-5">
@@ -130,18 +139,6 @@ function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
               onChange={handleChange}
               className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter name"
-              required
-            />
-          </div>
-          <div className="mb-4 ">
-            <label className="block text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Password"
               required
             />
           </div>

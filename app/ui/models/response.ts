@@ -65,3 +65,9 @@ status:boolean,
   message:string,
   data:UserItem[];
 }
+
+export interface addUserResponse{
+  status:boolean,
+    message:string,
+    data:UserItem;
+  }

@@ -13,6 +13,7 @@ import UpdateExistingCouponForm from "@/app/ui/component/popup_model/updateExist
 import Swal from "sweetalert2";
 import { usePathname } from "next/navigation";
 import { camelCaseToTitle } from "@/app/ui/utility/textToCamelConverter";
+import Spinner from "@/app/ui/utility/spinner";
 function page() {
   const [couponCompleteList, setCouponcCompleteList] = useState<Coupon[]>([]);
   const [couponList, setCouponList] = useState<Coupon[]>([]);
@@ -23,6 +24,7 @@ function page() {
   const [categoryOption, setCategoryOption] = useState<MasterDataItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const currentpath=usePathname();
+  const [Loading,setLoading]=useState(false);
 
   const updatedCurrentPath = currentpath
   .split("/") 
@@ -57,6 +59,23 @@ function page() {
     console.log("couponList:", couponList);
   }, [couponList]);
 
+  const handleDeleteAPI=(id:string)=>{
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setLoading(true);
+        deleteAPI(id);
+      }
+    });
+  }
+
   const deleteAPI = async (id: string) => {
     try {
       const response = await fetch("/api/coupon/delete", {
@@ -73,6 +92,7 @@ function page() {
         (await response.json()) as couponResponse;
 
       console.log("response:", sResponse);
+      setLoading(false);
       if (sResponse.status) {
         setCouponList((prev) => {
           const updatedList = prev.filter((item) => item._id !== id);
@@ -91,6 +111,7 @@ function page() {
       }
     } catch (error) {
       console.error("Error updating notes:", error);
+      setLoading(false);
       Swal.fire({
         title: "Error",
         text: "An error occurred while delete the coupon. Please try again.",
@@ -100,6 +121,7 @@ function page() {
   };
 
   const FetchAPI = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/coupon/get", {
         method: "GET",
@@ -115,11 +137,13 @@ function page() {
         (await response.json()) as couponResponse;
 
       console.log("response:", sResponse);
+      setLoading(false);
       if (sResponse.status) {
         setCouponList(sResponse.data);
         setCouponcCompleteList(sResponse.data);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error updating notes:", error);
       Swal.fire({
         title: "Error",
@@ -131,6 +155,11 @@ function page() {
 
   return (
     <div className="w-full h-screen p-4 bg-gray-100">
+       {Loading && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+                  <Spinner loading={Loading} />
+                </div>
+              )}
       <div className="w-full h-14 mb-4 flex justify-between items-center">
         <div className="text-2xl font-bold">
           {updatedCurrentPath}
@@ -173,9 +202,9 @@ function page() {
         ))}
       </div>
 
-      <div className="overflow-auto rounded-lg shadow-lg bg-white">
+      <div className="h-[564px] overflow-y-auto rounded-lg shadow-lg bg-white">
         <table className="min-w-full border-collapse border border-gray-200">
-          <thead>
+          <thead className="bg-gray-800 text-white sticky top-0 z-10">
             <tr className="bg-gray-800 text-white">
               <th className="p-3 text-left">S.No</th>
               <th className="p-3 text-left">Image</th>
@@ -189,7 +218,7 @@ function page() {
               <th className="p-3 text-left">Delete</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="">
             {couponList.length > 0 ? (
               couponList.map((coupon, index) => (
                 <tr key={coupon.code} className="even:bg-gray-100">
@@ -237,7 +266,7 @@ function page() {
                   <td
                     className="p-3 border border-gray-200 text-center cursor-pointer"
                     onClick={() => {
-                      deleteAPI(coupon._id);
+                      handleDeleteAPI(coupon._id);
                     }}
                   >
                     <div className="flex justify-center items-center space-x-2">

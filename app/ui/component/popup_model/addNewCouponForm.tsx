@@ -9,6 +9,7 @@ import {
   MasterDataItem,
 } from "../../models/response";
 import MultiSelectField from "../../reuseableComponent/multiSelectComponent";
+import Spinner from "../../utility/spinner";
 type PopupFormProps = {
   setIsOpen: (isOpen: boolean) => void; // Function to control popup visibility
   onSave: (data: Coupon | ((prev: Coupon[]) => Coupon[])) => void;
@@ -34,6 +35,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
     discountValue: "",
     category: "",
   });
+  const [Loading,setLoading]=useState(false);
   const [typeOfBooking, setTypeOfBooking] = useState<MasterDataItem[]>([]);
 
   const [discountTypeList, setDiscountTypeList] = useState<MasterDataItem[]>(
@@ -76,7 +78,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
       });
       return;
     }
-
+    setLoading(true);
     try {
       const response = await fetch("/api/coupon/add", {
         method: "POST",
@@ -97,7 +99,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
       });
       const sResponse: addCouponResponse =
         (await response.json()) as addCouponResponse;
-
+        setLoading(false);
       if (sResponse.status) {
         Swal.fire({
           title: "Add Coupon Successful",
@@ -113,6 +115,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
         });
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error adding coupon:", error);
       Swal.fire({
         title: "Error",
@@ -124,6 +127,11 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {Loading && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+                  <Spinner loading={Loading} />
+                </div>
+              )}
       <div className="bg-white  pt-3  rounded-lg shadow-lg w-[550px] ">
         <div className="flex justify-between items-center px-6 py-4 border-b-2">
           <h2 className="text-xl font-bold">Add Coupon</h2>

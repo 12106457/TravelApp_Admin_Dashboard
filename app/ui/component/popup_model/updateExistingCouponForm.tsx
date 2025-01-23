@@ -2,6 +2,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import CloseIcon from "@/public/close-icon.svg";
 import Swal from "sweetalert2";
+import Spinner from "@/app/ui/utility/spinner";
 import {
   couponResponse,
   addCouponResponse,
@@ -36,6 +37,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave, data }) => {
     category: "",
   });
   const [typeOfBooking, setTypeOfBooking] = useState<MasterDataItem[]>([]);
+  const [Loading,setLoading]=useState(false);
 
   useEffect(() => {
     setFormData({
@@ -97,7 +99,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave, data }) => {
       });
       return;
     }
-
+    setLoading(true);
     try {
       const response = await fetch("/api/coupon/update", {
         method: "PUT",
@@ -118,7 +120,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave, data }) => {
       });
       const sResponse = await response.json();
       console.log("response:", sResponse);
-
+      setLoading(false);
       if (sResponse.status) {
         Swal.fire({
           title: "Update Coupon Details",
@@ -134,6 +136,7 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave, data }) => {
         });
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error adding coupon:", error);
       Swal.fire({
         title: "Error",
@@ -145,6 +148,11 @@ const PopupForm: React.FC<PopupFormProps> = ({ setIsOpen, onSave, data }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+       {Loading && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+                  <Spinner loading={Loading} />
+                </div>
+              )}
       <div
         className="bg-white  pt-3 pb-8 rounded-lg shadow-lg w-[550px] h-[630px] overflow-auto"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
