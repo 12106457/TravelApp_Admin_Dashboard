@@ -11,6 +11,8 @@ import Couponicon from "@/public/coupon-icon.svg";
 import CouponOutlineicon from "@/public/coupon-outline-icon.svg";
 import Ordericon from "@/public/orders-icon.svg";
 import OrderOutlineicon from "@/public/order-outline-icon.svg";
+import MenuOutlineicon from "@/public/menu-icon-outline.svg";
+import Menuicon from "@/public/menu-icon.svg";
 
 function Sidebar() {
   const router = useRouter();
@@ -38,6 +40,12 @@ function Sidebar() {
       path: "/dashboard/users",
       activeicon: Usericon,
       Inactiveicon: UserOutlineicon,
+    },
+    {
+      name: "Enum Data",
+      path: "/dashboard/enum_data",
+      activeicon: Menuicon,
+      Inactiveicon: MenuOutlineicon,
     },
     {
       name: "Orders",

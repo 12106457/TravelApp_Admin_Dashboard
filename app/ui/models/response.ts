@@ -34,6 +34,11 @@ id:number,
 name:string,
 short_name?:string,
 symbol?:string,
+active:boolean
+}
+export type EnumDataItem={
+  category:string,
+  data:MasterDataItem[]
 }
 
 export interface UserItem {

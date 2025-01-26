@@ -136,8 +136,8 @@ function page() {
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Phone</th>
               <th className="p-3 text-left">No of Coupons</th>
+              <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Edit</th>
-              <th className="p-3 text-left">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -169,6 +169,10 @@ function page() {
                       </span>
                     </div>
                   </td>
+                  <td className="p-3 border border-gray-200">
+                    {item.active? (<span className='text-2xl'>✅</span>):(<span className='text-2xl'>❌</span>)
+                    }
+                  </td>
                   <td className="p-3 border border-gray-200 text-center cursor-pointer">
                     <div
                       className="flex justify-center items-center space-x-2"
@@ -186,28 +190,13 @@ function page() {
                       {/* <span className="text-blue-600 font-semibold">Edit</span> */}
                     </div>
                   </td>
-                  <td
-                    className="p-3 border border-gray-200 text-center cursor-pointer"
-                    onClick={() => {
-                      // deleteAPI(coupon._id);
-                    }}
-                  >
-                    <div className="flex justify-center items-center space-x-2">
-                      <Image
-                        src={DeleteIcon}
-                        alt="delete icon"
-                        width={20}
-                        height={20}
-                      />
-                      {/* <span className="text-red-600 font-semibold">Delete</span> */}
-                    </div>
-                  </td>
+                 
                 </tr>
               ))
             ) : (
               <tr>
                 <td
-                  colSpan={10}
+                  colSpan={8}
                   className="p-3 text-center text-gray-500 border border-gray-200"
                 >
                   No User available.

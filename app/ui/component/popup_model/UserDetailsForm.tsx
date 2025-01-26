@@ -164,6 +164,7 @@ function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
             <div className="flex justify-center items-center gap-7">
               {/* Active Button */}
               <button
+              type="button"
                 onClick={() => setFormData({ ...formData, ["active"]: true })}
                 className={`px-4 py-2 rounded-lg w-[50%] font-semibold border transition-all duration-300 ${
                   formData.active
@@ -176,6 +177,7 @@ function UserDetailsForm({ setIsOpen,onSave }: PropsType) {
 
               {/* Inactive Button */}
               <button
+              type="button"
                 onClick={() => setFormData({ ...formData, ["active"]: false })}
                 className={`px-4 py-2 rounded-lg w-[50%] font-semibold border transition-all duration-300 ${
                   !formData.active

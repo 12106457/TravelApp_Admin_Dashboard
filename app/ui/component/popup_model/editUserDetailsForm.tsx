@@ -25,7 +25,7 @@ function UserDetailsForm({ setIsOpen,data,onSave }: PropsType) {
         lastname: data?.lastname||"",
         email: data?.email||"",
         phone: data?.phone||"",
-        active: data?.active||true,
+        active: data?.active||false,
     })
   },[data]);
 
@@ -41,7 +41,7 @@ function UserDetailsForm({ setIsOpen,data,onSave }: PropsType) {
     e.preventDefault();
     setLoading(true);
         try {
-          const response = await fetch("/api/users/update", {
+          const response = await fetch("/api/user/update", {
             method: "PUT",
             headers: {
               //   authorization: Bearer ${localStorage.getItem('authToken')},
@@ -161,6 +161,7 @@ function UserDetailsForm({ setIsOpen,data,onSave }: PropsType) {
             <div className="flex justify-center items-center gap-7">
               {/* Active Button */}
               <button
+              type="button"
                 onClick={() => setFormData({ ...formData, ["active"]: true })}
                 className={`px-4 py-2 rounded-lg w-[50%] font-semibold border transition-all duration-300 ${
                   formData.active
@@ -173,6 +174,7 @@ function UserDetailsForm({ setIsOpen,data,onSave }: PropsType) {
 
               {/* Inactive Button */}
               <button
+              type="button"
                 onClick={() => setFormData({ ...formData, ["active"]: false })}
                 className={`px-4 py-2 rounded-lg w-[50%] font-semibold border transition-all duration-300 ${
                   !formData.active
