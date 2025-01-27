@@ -34,7 +34,7 @@ id:number,
 name:string,
 short_name?:string,
 symbol?:string,
-active:boolean
+active?:boolean
 }
 export type EnumDataItem={
   category:string,
