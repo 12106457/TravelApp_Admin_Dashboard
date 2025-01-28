@@ -30,7 +30,7 @@ function page() {
   .split("/") 
   .filter(Boolean) 
   .map((segment) => camelCaseToTitle(segment)) 
-  .join(" / "); 
+  .join(" > "); 
 
   useEffect(() => {
     const storedData = localStorage.getItem("masterData");

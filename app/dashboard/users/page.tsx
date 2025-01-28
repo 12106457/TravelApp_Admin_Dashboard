@@ -27,16 +27,27 @@ function page() {
   const [viewCoupons,setViewCoupons]=useState(false);
   const [couponData,setCouponData]=useState<CouponDetails[]>([]);
   const currentpath = usePathname();
+  const [formData, setFormData] = useState<MasterDataItem>({
+      id:0,
+      name: "",
+      short_name: "",
+      symbol: "",
+      active: true,
+    });
 
   const updatedCurrentPath = currentpath
     .split("/")
     .filter(Boolean)
     .map((segment) => camelCaseToTitle(segment))
-    .join(" / ");
+    .join(" > ");
 
   useEffect(() => {
     FetchAPI();
   }, []);
+
+  const handleUpdateForm=()=>{
+
+  }
 
   // const deleteAPI = async (id: string) => {
   //   try {
@@ -117,7 +128,7 @@ function page() {
       <div className="w-full h-14 mb-4 flex justify-between items-center">
         <div className="text-2xl font-bold">{updatedCurrentPath}</div>
         <button
-          className="p-2 bg-blue-600 rounded text-white mr-3 font-medium"
+          className="p-2 bg-orange-600 rounded text-white mr-3 font-medium"
           onClick={() => {
             setIsOpen(true);
           }}

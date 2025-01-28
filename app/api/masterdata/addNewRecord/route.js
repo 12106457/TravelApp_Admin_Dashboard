@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-export async function PUT(req) {
+export async function POST(req) {
   const axiosInstance = axios.create({
     httpsAgent: new (require("https").Agent)({
       rejectUnauthorized: false,
@@ -15,13 +15,14 @@ export async function PUT(req) {
     // Fetch the request body
     const body = await req.json();
     const headers = await req.headers;
-    // const authToken = headers.get("authorization") || "Bearer";
 
-    const category = headers.get("category"); // Ensure this works as expected
+    const category = headers.get("category");
+    // const authToken = headers.post("authorization") || "Bearer";
+    // Make a POST request to your external backend API using Axios
 
-    const url = process.env.NEXT_PUBLIC_API_URL + `/masterdata/updateEnum/${category}`;
+    const url = process.env.NEXT_PUBLIC_API_URL + `/masterdata/add/${category}`;
 
-    const axiosResponse = await axiosInstance.put(url, body, {
+    const axiosResponse = await axiosInstance.post(url, body, {
       headers: {
         "Content-Type": "application/json",
         // Authorization: authToken,

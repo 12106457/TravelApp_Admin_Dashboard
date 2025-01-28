@@ -7,17 +7,21 @@ import { useParams, usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import EditIcon from "@/public/edit-icon.svg";
 import Swal from 'sweetalert2';
+import MasterDataForm from "@/app/ui/component/popup_model/masterDataForm";
 
 const page = () => {
     const {category}=useParams();
      const [loading, setLoading] = useState(false);
      const [categoryData,setCategoryData]=useState<MasterDataItem[]>([]);
     const currentpath=usePathname();
+    const [isEditOpen,setIsEditOpen]=useState(false);
+    const [addNewForm,setAddNewForm]=useState(false);
+    const [selectMasterData,setSelectMasterData]=useState<MasterDataItem>();
     const updatedCurrentPath = currentpath
         .split("/") 
         .filter(Boolean) 
         .map((segment) => camelCaseToTitle(segment)) 
-        .join(" / "); 
+        .join(" > "); 
     useEffect(()=>{
         const storedData = localStorage.getItem("masterData");
             if (storedData) {
@@ -28,8 +32,67 @@ const page = () => {
             }
     },[category]);
 
-    const handleupdate = async (e: React.FormEvent)=> {
-        e.preventDefault();
+
+    const handleAddNewMasterDataRecord= async ()=>{
+      setLoading(true);
+      try {
+        const response = await fetch("/api/masterdata/addNewRecord", {
+          method: "POST",
+          headers: {
+            //   authorization: Bearer ${localStorage.getItem('authToken')},
+            category: category+"" || "",
+          },
+          body: JSON.stringify({
+              "name":selectMasterData?.name,
+              "short_name":selectMasterData?.short_name||"",
+              "symbol":selectMasterData?.symbol||"",
+              "active":selectMasterData?.active
+          }),
+        });
+        const sResponse = await response.json();
+        console.log("response:", sResponse);
+        setLoading(false);
+        if (sResponse.status) {
+          Swal.fire({
+            title: "Added New Record Successful",
+            icon: "success",
+          });
+
+          const newData = sResponse.data.type;
+
+          const updatedData = [...categoryData, newData];
+
+          setCategoryData(updatedData);
+
+          const completeMasterData = JSON.parse(localStorage.getItem("completeMasterData") || "{}");
+          
+          // If completeMasterData exists, update the category inside it
+          if (completeMasterData && completeMasterData[category+""]) {
+            completeMasterData[category+""] = updatedData;
+          }
+          localStorage.setItem("completeMasterData", JSON.stringify(completeMasterData));
+        } else {
+          Swal.fire({
+            title: "Failed To Add New Record.",
+            text: sResponse.message || "An unknown error occurred.",
+            icon: "error",
+          });
+        }
+      } catch (error) {
+        setLoading(false);
+        console.error("Error adding coupon:", error);
+        Swal.fire({
+          title: "Error",
+          text: "An error occurred while Adding New Record. Please try again.",
+          icon: "error",
+        });
+      }
+      
+    }
+
+
+    const handleupdate = async ()=> {
+        
         setLoading(true);
             try {
               const response = await fetch("/api/masterdata/update", {
@@ -39,8 +102,11 @@ const page = () => {
                   category: category+"" || "",
                 },
                 body: JSON.stringify({
-                    
-                  
+                    "id":selectMasterData?.id,
+                    "name":selectMasterData?.name,
+                    "short_name":selectMasterData?.short_name,
+                    "symbol":selectMasterData?.symbol,
+                    "active":selectMasterData?.active
                 }),
               });
               const sResponse = await response.json();
@@ -51,8 +117,20 @@ const page = () => {
                   title: "Update User Details Successful",
                   icon: "success",
                 });
-                // onSave(sResponse.data);
-                // setIsOpen(false);
+                const updatedData = categoryData.map((item) => {
+                  return item.id === sResponse.data.type.id
+                    ? { ...item, ...sResponse.data.type }
+                    : item;
+                });
+              
+                setCategoryData(updatedData);
+                const completeMasterData = JSON.parse(localStorage.getItem("completeMasterData") || "{}");
+                console.log("completeMasterData:",completeMasterData);
+                // If completeMasterData exists, update the category inside it
+                if (completeMasterData && completeMasterData[category+""]) {
+                  completeMasterData[category+""] = updatedData;
+                }
+                localStorage.setItem("completeMasterData", JSON.stringify(completeMasterData));
               } else {
                 Swal.fire({
                   title: "Failed to Update User Details",
@@ -78,10 +156,18 @@ const page = () => {
                   <Spinner loading={loading} />
                 </div>
               )}
-      <div className="w-full h-14 mb-4 flex justify-start items-center">
+      <div className="w-full h-14 mb-4 flex justify-between items-center">
         <div className="text-2xl font-bold">
           {updatedCurrentPath}
         </div>
+        <button
+          className="p-2 bg-orange-600 rounded text-white mr-3 font-medium"
+          onClick={() => {
+            setAddNewForm(true);
+          }}
+        >
+          Add New Record
+        </button>
       </div>
       <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
                 <table className="min-w-full table-auto">
@@ -108,10 +194,10 @@ const page = () => {
                                     <td className="p-3 border border-gray-200 text-center cursor-pointer">
                                             <div
                                             className="flex justify-center items-center space-x-2"
-                                            // onClick={() => {
-                                            //     setIsEditOpen(true);
-                                            //     setEditData(coupon);
-                                            // }}
+                                            onClick={() => {
+                                                setIsEditOpen(true);
+                                                setSelectMasterData(item);
+                                            }}
                                             >
                                             <Image
                                                 src={EditIcon}
@@ -134,6 +220,16 @@ const page = () => {
                     </tbody>
                 </table>
             </div>
+            {
+              isEditOpen&&(
+                <MasterDataForm setIsOpen={setIsEditOpen} data={selectMasterData} onChange={setSelectMasterData} CallApiFunction={handleupdate} />
+              )
+            }
+            {
+              addNewForm&&(
+                <MasterDataForm setIsOpen={setAddNewForm} onChange={setSelectMasterData} CallApiFunction={handleAddNewMasterDataRecord} />
+              )
+            }
     </div>
   )
 }

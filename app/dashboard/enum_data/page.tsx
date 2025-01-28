@@ -15,11 +15,11 @@ function Page() {
     .split("/") 
     .filter(Boolean) 
     .map((segment) => camelCaseToTitle(segment)) 
-    .join(" / "); 
+    .join(" > "); 
   
 
   useEffect(() => {
-    const storedData = localStorage.getItem('masterData');
+    const storedData = localStorage.getItem('completeMasterData');
     
     if (storedData) {
       try {

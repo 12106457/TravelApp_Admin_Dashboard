@@ -9,8 +9,41 @@ function page() {
 
   const handleSubmit = () => {
     fetchMasterData();
+    fetchTotalMasterData();
     route.push("/dashboard");
   };
+
+  const fetchTotalMasterData= async ()=>{
+    try {
+      const response = await fetch("/api/masterdata/getTotalMasterData", {
+        method: "GET",
+        // headers: {
+        //   authorization: Bearer ${localStorage.getItem('authToken')},
+        //   'notesId': String(currentCallNote?.id),
+        // },
+      });
+      const sResponse: masterDataResponse =
+        (await response.json()) as masterDataResponse;
+
+      //   console.log("response:", sResponse);
+      if (sResponse.status) {
+        localStorage.setItem("completeMasterData", JSON.stringify(sResponse.data));
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: sResponse.message,
+          icon: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating notes:", error);
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while fetching the coupon. Please try again.",
+        icon: "error",
+      });
+    }
+  }
 
   const fetchMasterData = async () => {
     try {
